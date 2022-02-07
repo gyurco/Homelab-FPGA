@@ -4,7 +4,7 @@ module Homelab (
 	input         CHR64,
 	output        HSYNC,
 	output        VSYNC,
-	output        HBLANK,
+	output reg    HBLANK,
 	output        VBLANK,
 	output        VIDEO,
 	output reg    AUDIO,
@@ -35,7 +35,6 @@ reg  [8:0] hcnt;
 wire       hblank = hcnt[8];
 wire       hsync = hblank & hcnt[4] & hcnt[5] & ~hcnt[6];
 assign     HSYNC = ~hsync;
-assign     HBLANK = hblank;
 
 reg  [8:0] vcnt;
 wire       vblank = vcnt[8];
@@ -43,7 +42,7 @@ wire       vsync = vblank & ~vcnt[5] & vcnt[4] & vcnt[3];
 assign     VSYNC = ~vsync;
 assign     VBLANK = vblank;
 
-always @(posedge CLK12) begin
+always @(posedge CLK12) begin : COUNTERS
 	if (cen6) begin
 		hcnt <= hcnt + 1'd1;
 		if (hcnt == 383) hcnt <= 0;
@@ -51,6 +50,12 @@ always @(posedge CLK12) begin
 			vcnt <= vcnt + 1'd1;
 			if (vcnt == 319) vcnt <= 0;
 		end
+	end
+end
+
+always @(posedge CLK12) begin : BLANK
+	if (CHR64 | cen6) begin
+		if (hcnt[1:0] == 2'b11 & (CHR64 | hcnt[2])) HBLANK <= hblank;
 	end
 end
 

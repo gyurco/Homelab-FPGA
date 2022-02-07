@@ -122,7 +122,7 @@ wire        video;
 wire        audio;
 wire        hs, vs;
 wire        hb, vb;
-wire        blankn = 1;// ~(hb | vb);
+wire        blankn = ~(hb | vb);
 
 Homelab Homelab (
 	.RESET(reset),
